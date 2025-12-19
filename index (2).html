@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo Dõi Tập Tính Nai Nuôi Nhốt</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Sarabun', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://images.unsplash.com/photo-1484406566174-9da000fda645?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.15;
+            z-index: -1;
+        }
+        
+        .deer-icon {
+            font-size: 80px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .glass-card {
+            background: rgba(6, 78, 59, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(250, 204, 21, 0.3);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.2) 0%, rgba(6, 78, 59, 0.8) 100%);
+            border: 2px solid rgba(250, 204, 21, 0.5);
+        }
+        
+        .table-row:hover {
+            background: rgba(250, 204, 21, 0.1);
+        }
+        
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(250, 204, 21, 0.5) !important;
+            color: #fde047 !important;
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: rgba(250, 204, 21, 0.6) !important;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none !important;
+            border-color: #facc15 !important;
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.3) !important;
+        }
+        
+        option {
+            background: #064e3b;
+            color: #fde047;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+            color: #064e3b;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(250, 204, 21, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="text-yellow-300 p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8 animate-fade-in">
+            <div class="deer-icon mb-2">🦌</div>
+            <h1 class="text-4xl md:text-5xl font-bold text-yellow-400 mb-2 drop-shadow-lg">
+                Theo Dõi Tập Tính Nai Nuôi Nhốt
+            </h1>
+            <p class="text-yellow-300/80 text-lg">Hệ thống ghi nhận và phân tích hành vi hàng ngày</p>
+        </header>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-fade-in">
+            <div class="stat-card rounded-xl p-4 text-center">
+                <div class="text-3xl mb-1">📊</div>
+                <div class="text-2xl font-bold text-yellow-400" id="totalRecords">0</div>
+                <div class="text-sm text-yellow-300/70">Tổng ghi nhận</div>
+            </div>
+            <div class="stat-card rounded-xl p-4 text-center">
+                <div class="text-3xl mb-1">🦌</div>
+                <div class="text-2xl font-bold text-yellow-400" id="totalDeer">0</div>
+                <div class="text-sm text-yellow-300/70">Số nai theo dõi</div>
+            </div>
+            <div class="stat-card rounded-xl p-4 text-center">
+                <div class="text-3xl mb-1">💚</div>
+                <div class="text-2xl font-bold text-yellow-400" id="healthyCount">0</div>
+                <div class="text-sm text-yellow-300/70">Sức khỏe tốt</div>
+            </div>
+            <div class="stat-card rounded-xl p-4 text-center">
+                <div class="text-3xl mb-1">📅</div>
+                <div class="text-2xl font-bold text-yellow-400" id="todayRecords">0</div>
+                <div class="text-sm text-yellow-300/70">Hôm nay</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Form Section -->
+            <div class="glass-card rounded-2xl p-6 animate-fade-in">
+                <h2 class="text-2xl font-bold text-yellow-400 mb-6 flex items-center gap-2">
+                    <span>📝</span> Ghi Nhận Tập Tính
+                </h2>
+                
+                <form id="behaviorForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-yellow-400 mb-1 text-sm font-semibold">Mã số nai *</label>
+                            <input type="text" id="deerId" required placeholder="VD: NAI-001" 
+                                class="w-full px-4 py-2 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-yellow-400 mb-1 text-sm font-semibold">Ngày ghi nhận *</label>
+                            <input type="date" id="date" required 
+                                class="w-full px-4 py-2 rounded-lg">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-yellow-400 mb-1 text-sm font-semibold">Thời gian *</label>
+                            <input type="time" id="time" required 
+                                class="w-full px-4 py-2 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-yellow-400 mb-1 text-sm font-semibold">Tình trạng sức khỏe</label>
+                            <select id="health" class="w-full px-4 py-2 rounded-lg">
+                                <option value="Tốt">🟢 Tốt</option>
+                                <option value="Bình thường">🟡 Bình thường</option>
+                                <option value="Yếu">🟠 Yếu</option>
+                                <option value="Bệnh">🔴 Bệnh</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-yellow-400 mb-1 text-sm font-semibold">Hoạt động chính</label>
+                        <select id="activity" class="w-full px-4 py-2 rounded-lg">
+                            <option value="Ăn cỏ">🌿 Ăn cỏ</option>
+                            <option value="Uống nước">💧 Uống nước</option>
+                            <option value="Nghỉ ngơi">😴 Nghỉ ngơi</option>
+                            <option value="Di chuyển">🚶 Di chuyển</option>
+                            <option value="Nhai lại">🔄 Nhai lại</option>
+                            <option value="Giao tiếp">🗣️ Giao tiếp với đàn</option>
+                            <option value="Đứng im">🧍 Đứng im quan sát</option>
+                            <option value="Chải lông">✨ Chải lông/tự vệ sinh</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-yellow-400 mb-1 text-sm font-semibold">Lượng thức ăn (kg)</label>
+                            <input type="number" id="foodAmount" step="0.1" min="0" placeholder="0.0"
+                                class="w-full px-4 py-2 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-yellow-400 mb-1 text-sm font-semibold">Lượng nước (lít)</label>
+                            <input type="number" id="waterAmount" step="0.1" min="0" placeholder="0.0"
+                                class="w-full px-4 py-2 rounded-lg">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-yellow-400 mb-1 text-sm font-semibold">Hành vi đặc biệt</label>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="aggressive" class="w-4 h-4 accent-yellow-400">
+                                <span>⚠️ Hung dữ</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="isolated" class="w-4 h-4 accent-yellow-400">
+                                <span>🔕 Tách đàn</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="mating" class="w-4 h-4 accent-yellow-400">
+                                <span>💕 Động dục</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="nervous" class="w-4 h-4 accent-yellow-400">
+                                <span>😰 Lo lắng</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-yellow-400 mb-1 text-sm font-semibold">Ghi chú thêm</label>
+                        <textarea id="notes" rows="3" placeholder="Nhập ghi chú về tập tính đặc biệt..."
+                            class="w-full px-4 py-2 rounded-lg resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full py-3 rounded-xl text-lg">
+                        💾 Lưu Ghi Nhận
+                    </button>
+                </form>
+            </div>
+
+            <!-- Records List -->
+            <div class="glass-card rounded-2xl p-6 animate-fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-yellow-400 flex items-center gap-2">
+                        <span>📋</span> Lịch Sử Ghi Nhận
+                    </h2>
+                    <div class="flex gap-2">
+                        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm..." 
+                            class="px-3 py-1 rounded-lg text-sm w-32">
+                        <button onclick="exportData()" class="bg-yellow-500/20 hover:bg-yellow-500/30 px-3 py-1 rounded-lg text-sm text-yellow-400 border border-yellow-500/50">
+                            📥 Xuất
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="recordsList" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                    <p class="text-center text-yellow-300/50 py-8">Chưa có ghi nhận nào</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-8 text-yellow-300/50 text-sm">
+            <p>🦌 Hệ thống theo dõi tập tính nai nuôi nhốt © 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize
+        let records = JSON.parse(localStorage.getItem('deerRecords')) || [];
+        
+        // Set default date to today
+        document.getElementById('date').valueAsDate = new Date();
+        document.getElementById('time').value = new Date().toTimeString().slice(0, 5);
+        
+        // Form submit handler
+        document.getElementById('behaviorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const specialBehaviors = [];
+            if (document.getElementById('aggressive').checked) specialBehaviors.push('Hung dữ');
+            if (document.getElementById('isolated').checked) specialBehaviors.push('Tách đàn');
+            if (document.getElementById('mating').checked) specialBehaviors.push('Động dục');
+            if (document.getElementById('nervous').checked) specialBehaviors.push('Lo lắng');
+            
+            const record = {
+                id: Date.now(),
+                deerId: document.getElementById('deerId').value.toUpperCase(),
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                health: document.getElementById('health').value,
+                activity: document.getElementById('activity').value,
+                foodAmount: parseFloat(document.getElementById('foodAmount').value) || 0,
+                waterAmount: parseFloat(document.getElementById('waterAmount').value) || 0,
+                specialBehaviors: specialBehaviors,
+                notes: document.getElementById('notes').value
+            };
+            
+            records.unshift(record);
+            saveRecords();
+            renderRecords();
+            updateStats();
+            
+            // Reset form
+            this.reset();
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('time').value = new Date().toTimeString().slice(0, 5);
+            
+            // Show success message
+            showNotification('✅ Đã lưu ghi nhận thành công!');
+        });
+        
+        // Render records
+        function renderRecords(filter = '') {
+            const container = document.getElementById('recordsList');
+            let filteredRecords = records;
+            
+            if (filter) {
+                filter = filter.toLowerCase();
+                filteredRecords = records.filter(r => 
+                    r.deerId.toLowerCase().includes(filter) ||
+                    r.activity.toLowerCase().includes(filter) ||
+                    r.notes.toLowerCase().includes(filter)
+                );
+            }
+            
+            if (filteredRecords.length === 0) {
+                container.innerHTML = '<p class="text-center text-yellow-300/50 py-8">Không có ghi nhận nào</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredRecords.map(record => {
+                const healthIcon = {
+                    'Tốt': '🟢',
+                    'Bình thường': '🟡',
+                    'Yếu': '🟠',
+                    'Bệnh': '🔴'
+                }[record.health] || '⚪';
+                
+                const activityIcon = {
+                    'Ăn cỏ': '🌿',
+                    'Uống nước': '💧',
+                    'Nghỉ ngơi': '😴',
+                    'Di chuyển': '🚶',
+                    'Nhai lại': '🔄',
+                    'Giao tiếp': '🗣️',
+                    'Đứng im': '🧍',
+                    'Chải lông': '✨'
+                }[record.activity] || '📌';
+                
+                return `
+                    <div class="table-row bg-green-900/30 rounded-xl p-4 border border-yellow-500/20 transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl">🦌</span>
+                                <div>
+                                    <span class="font-bold text-yellow-400">${record.deerId}</span>
+                                    <span class="text-yellow-300/60 text-sm ml-2">${formatDate(record.date)} - ${record.time}</span>
+                                </div>
+                            </div>
+                            <button onclick="deleteRecord(${record.id})" class="text-red-400 hover:text-red-300 text-sm px-2 py-1 rounded hover:bg-red-500/20">
+                                🗑️
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-sm mb-2">
+                            <div>${healthIcon} Sức khỏe: <span class="text-yellow-400">${record.health}</span></div>
+                            <div>${activityIcon} ${record.activity}</div>
+                            <div>🍽️ Thức ăn: <span class="text-yellow-400">${record.foodAmount} kg</span></div>
+                            <div>💧 Nước: <span class="text-yellow-400">${record.waterAmount} L</span></div>
+                        </div>
+                        ${record.specialBehaviors.length > 0 ? `
+                            <div class="text-sm mb-2">
+                                <span class="text-yellow-400/70">Hành vi đặc biệt:</span>
+                                ${record.specialBehaviors.map(b => `<span class="inline-block bg-yellow-500/20 px-2 py-0.5 rounded text-xs ml-1">${b}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${record.notes ? `<div class="text-sm text-yellow-300/70 italic">📝 ${record.notes}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Delete record
+        function deleteRecord(id) {
+            if (confirm('Bạn có chắc muốn xóa ghi nhận này?')) {
+                records = records.filter(r => r.id !== id);
+                saveRecords();
+                renderRecords();
+                updateStats();
+                showNotification('🗑️ Đã xóa ghi nhận!');
+            }
+        }
+        
+        // Save to localStorage
+        function saveRecords() {
+            localStorage.setItem('deerRecords', JSON.stringify(records));
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const uniqueDeer = [...new Set(records.map(r => r.deerId))];
+            const healthyRecords = records.filter(r => r.health === 'Tốt');
+            const todayRecords = records.filter(r => r.date === today);
+            
+            document.getElementById('totalRecords').textContent = records.length;
+            document.getElementById('totalDeer').textContent = uniqueDeer.length;
+            document.getElementById('healthyCount').textContent = healthyRecords.length;
+            document.getElementById('todayRecords').textContent = todayRecords.length;
+        }
+        
+        // Format date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+        
+        // Export data
+        function exportData() {
+            if (records.length === 0) {
+                showNotification('⚠️ Không có dữ liệu để xuất!');
+                return;
+            }
+            
+            let csv = 'Mã nai,Ngày,Giờ,Sức khỏe,Hoạt động,Thức ăn (kg),Nước (L),Hành vi đặc biệt,Ghi chú\n';
+            records.forEach(r => {
+                csv += `${r.deerId},${r.date},${r.time},${r.health},${r.activity},${r.foodAmount},${r.waterAmount},"${r.specialBehaviors.join(', ')}","${r.notes}"\n`;
+            });
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `nai_taptinh_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showNotification('📥 Đã xuất file CSV thành công!');
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-800 border border-yellow-500 text-yellow-400 px-6 py-3 rounded-xl shadow-lg z-50 animate-fade-in';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            renderRecords(e.target.value);
+        });
+        
+        // Initial render
+        renderRecords();
+        updateStats();
+    </script>
+</body>
+</html>
