@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theo dõi tập tính hàng ngày của nai nuôi nhốt</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background-image:
+        linear-gradient(135deg, rgba(6, 78, 59, 0.9), rgba(21, 128, 61, 0.9)),
+        url("https://images.unsplash.com/photo-1516371535707-512a1e83bb9a?auto=format&fit=crop&w=1600&q=80");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #facc15; /* vàng */
+    }
+
+    ::placeholder {
+      color: rgba(250, 204, 21, 0.6);
+    }
+
+    .glass-panel {
+      background: rgba(6, 46, 34, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(250, 204, 21, 0.25);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(15, 118, 110, 0.4);
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: rgba(250, 204, 21, 0.6);
+      border-radius: 999px;
+    }
+
+    table thead tr {
+      background: rgba(6, 95, 70, 0.95);
+    }
+  </style>
+</head>
+<body class="font-sans">
+  <div class="min-h-screen flex flex-col items-center justify-start px-4 py-6 md:py-10">
+    <header class="w-full max-w-6xl mb-6 md:mb-8">
+      <div class="glass-panel rounded-2xl px-5 py-4 md:px-8 md:py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide text-yellow-300 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+            Theo dõi tập tính hàng ngày của nai nuôi nhốt
+          </h1>
+          <p class="mt-2 text-sm md:text-base text-yellow-100/80 max-w-2xl">
+            Ghi chép chi tiết hoạt động, thời gian, khẩu phần ăn, vị trí và tình trạng sức khỏe của từng cá thể nai. 
+            Dữ liệu được lưu trên trình duyệt (localStorage) để tiện so sánh theo ngày.
+          </p>
+        </div>
+        <div class="text-right text-xs md:text-sm text-yellow-100/70">
+          <p class="font-semibold">Trạng thái: <span id="statusText" class="text-emerald-200">Sẵn sàng</span></p>
+          <p id="lastSavedText" class="mt-1 text-yellow-100/60 text-[11px]"></p>
+        </div>
+      </div>
+    </header>
+
+    <main class="w-full max-w-6xl flex flex-col gap-6 md:gap-8">
+      <!-- Form nhập liệu -->
+      <section class="glass-panel rounded-2xl px-5 py-5 md:px-8 md:py-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-3 md:mb-4 flex items-center gap-2">
+          <span class="text-2xl">🦌</span>
+          <span>Nhật ký tập tính trong ngày</span>
+        </h2>
+        <form id="logForm" class="space-y-4 text-sm md:text-base">
+          <div class="grid gap-3 md:gap-4 md:grid-cols-4">
+            <div class="flex flex-col gap-1">
+              <label for="date" class="font-semibold">Ngày ghi nhận</label>
+              <input
+                type="date"
+                id="date"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+                required
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="timeBlock" class="font-semibold">Thời điểm</label>
+              <select
+                id="timeBlock"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+                required
+              >
+                <option value="" disabled selected>Chọn thời điểm</option>
+                <option value="Sáng sớm (5h - 8h)">Sáng sớm (5h - 8h)</option>
+                <option value="Buổi sáng (8h - 11h)">Buổi sáng (8h - 11h)</option>
+                <option value="Buổi trưa (11h - 14h)">Buổi trưa (11h - 14h)</option>
+                <option value="Buổi chiều (14h - 17h)">Buổi chiều (14h - 17h)</option>
+                <option value="Chiều tối (17h - 20h)">Chiều tối (17h - 20h)</option>
+                <option value="Ban đêm (20h - 5h)">Ban đêm (20h - 5h)</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="activity" class="font-semibold">Hoạt động chính</label>
+              <select
+                id="activity"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+                required
+              >
+                <option value="" disabled selected>Chọn hoạt động</option>
+                <option value="Ăn uống">Ăn uống</option>
+                <option value="Uống nước">Uống nước</option>
+                <option value="Nghỉ ngơi / Nằm">Nghỉ ngơi / Nằm</option>
+                <option value="Di chuyển / đi lại">Di chuyển / đi lại</option>
+                <option value="Chải lông / tự vệ sinh">Chải lông / tự vệ sinh</option>
+                <option value="Tương tác với nai khác">Tương tác với nai khác</option>
+                <option value="Hưng phấn / giao phối">Hưng phấn / giao phối</option>
+                <option value="Bất thường (hung dữ, cắn phá...)">Bất thường (hung dữ, cắn phá...)</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="duration" class="font-semibold">Thời lượng (phút)</label>
+              <input
+                type="number"
+                id="duration"
+                min="0"
+                step="5"
+                placeholder="Ví dụ: 30"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+              />
+            </div>
+          </div>
+
+          <div class="grid gap-3 md:gap-4 md:grid-cols-3">
+            <div class="flex flex-col gap-1">
+              <label for="feed" class="font-semibold">Thức ăn</label>
+              <input
+                type="text"
+                id="feed"
+                placeholder="Ví dụ: Cỏ voi 3kg + cám 0.5kg"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="location" class="font-semibold">Vị trí trong chuồng / khu nuôi</label>
+              <select
+                id="location"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+              >
+                <option value="" selected>Không xác định / Toàn khu</option>
+                <option value="Khu chuồng trong nhà">Khu chuồng trong nhà</option>
+                <option value="Sân cát / nền khô">Sân cát / nền khô</option>
+                <option value="Bãi cỏ mở">Bãi cỏ mở</option>
+                <option value="Khu cho ăn">Khu cho ăn</option>
+                <option value="Góc chuồng / sát hàng rào">Góc chuồng / sát hàng rào</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="health" class="font-semibold">Tình trạng sức khỏe</label>
+              <select
+                id="health"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+              >
+                <option value="Bình thường" selected>Bình thường</option>
+                <option value="Ăn uống kém">Ăn uống kém</option>
+                <option value="Lờ đờ / ít vận động">Lờ đờ / ít vận động</option>
+                <option value="Đau chân / đi lại khó">Đau chân / đi lại khó</option>
+                <option value="Có dấu hiệu bệnh đường hô hấp">Có dấu hiệu bệnh đường hô hấp</option>
+                <option value="Có vết thương / chảy máu">Có vết thương / chảy máu</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="note" class="font-semibold">Ghi chú chi tiết</label>
+            <textarea
+              id="note"
+              rows="2"
+              placeholder="Mô tả cụ thể hành vi, tương tác với con khác, phản ứng với người chăm sóc, môi trường..."
+              class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+            ></textarea>
+          </div>
+
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mt-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-yellow-400 text-emerald-950 font-semibold px-4 py-2 text-sm md:text-base hover:bg-yellow-300 active:bg-yellow-500 transition-colors shadow-lg shadow-yellow-900/40"
+              >
+                <span>Thêm bản ghi</span>
+              </button>
+              <button
+                type="button"
+                id="resetFormBtn"
+                class="inline-flex items-center justify-center rounded-lg border border-yellow-300/60 text-yellow-100 px-3 py-2 text-xs md:text-sm hover:bg-yellow-300/10"
+              >
+                Xóa dữ liệu trên form
+              </button>
+            </div>
+            <p class="text-[11px] md:text-xs text-yellow-100/70">
+              Gợi ý: Ghi chép nhiều mốc thời gian trong ngày cho cùng một cá thể để đánh giá chu kỳ hoạt động, khẩu phần ăn và trạng thái tâm lý.
+            </p>
+          </div>
+        </form>
+      </section>
+
+      <!-- Bộ lọc & thống kê nhanh -->
+      <section class="grid gap-4 md:gap-6 md:grid-cols-[1.2fr,1fr]">
+        <div class="glass-panel rounded-2xl px-5 py-4 md:px-6 md:py-5">
+          <h2 class="text-lg md:text-xl font-bold mb-3 flex items-center gap-2">
+            <span>🔎</span>
+            <span>Bộ lọc quan sát</span>
+          </h2>
+          <div class="grid gap-3 md:grid-cols-3 text-sm">
+            <div class="flex flex-col gap-1">
+              <label for="filterDate" class="font-semibold">Lọc theo ngày</label>
+              <input
+                type="date"
+                id="filterDate"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="filterActivity" class="font-semibold">Lọc theo hoạt động</label>
+              <select
+                id="filterActivity"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+              >
+                <option value="">Tất cả hoạt động</option>
+                <option value="Ăn uống">Ăn uống</option>
+                <option value="Uống nước">Uống nước</option>
+                <option value="Nghỉ ngơi / Nằm">Nghỉ ngơi / Nằm</option>
+                <option value="Di chuyển / đi lại">Di chuyển / đi lại</option>
+                <option value="Chải lông / tự vệ sinh">Chải lông / tự vệ sinh</option>
+                <option value="Tương tác với nai khác">Tương tác với nai khác</option>
+                <option value="Hưng phấn / giao phối">Hưng phấn / giao phối</option>
+                <option value="Bất thường (hung dữ, cắn phá...)">Bất thường (hung dữ, cắn phá...)</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="filterHealth" class="font-semibold">Lọc theo sức khỏe</label>
+              <select
+                id="filterHealth"
+                class="rounded-lg border border-yellow-400/40 bg-emerald-950/60 px-3 py-2 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-300/80 focus:border-yellow-300"
+              >
+                <option value="">Tất cả</option>
+                <option value="Bình thường">Bình thường</option>
+                <option value="Ăn uống kém">Ăn uống kém</option>
+                <option value="Lờ đờ / ít vận động">Lờ đờ / ít vận động</option>
+                <option value="Đau chân / đi lại khó">Đau chân / đi lại khó</option>
+                <option value="Có dấu hiệu bệnh đường hô hấp">Có dấu hiệu bệnh đường hô hấp</option>
+                <option value="Có vết thương / chảy máu">Có vết thương / chảy máu</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 mt-3 text-xs">
+            <button
+              id="clearFilterBtn"
+              class="inline-flex items-center rounded-lg border border-yellow-300/60 text-yellow-100 px-3 py-1.5 hover:bg-yellow-300/10"
+            >
+              Xóa bộ lọc
+            </button>
+            <button
+              id="clearAllBtn"
+              class="inline-flex items-center rounded-lg border border-red-400/70 text-red-200 px-3 py-1.5 hover:bg-red-500/20"
+            >
+              Xóa toàn bộ dữ liệu (trong trình duyệt)
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl px-5 py-4 md:px-6 md:py-5 text-sm">
+          <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+            <span>📊</span>
+            <span>Thống kê nhanh trong ngày chọn</span>
+          </h2>
+          <div id="summaryBox" class="space-y-2 text-yellow-100/90 text-xs md:text-sm">
+            <p><span class="font-semibold">Tổng bản ghi:</span> <span id="totalLogs">0</span></p>
+            <p><span class="font-semibold">Số hoạt động ăn uống:</span> <span id="eatCount">0</span></p>
+            <p><span class="font-semibold">Số hoạt động bất thường:</span> <span id="abnormalCount">0</span></p>
+            <p><span class="font-semibold">Tổng thời lượng quan sát (phút, nếu có nhập):</span> <span id="totalDuration">0</span></p>
+            <p class="mt-2 text-[11px] md:text-xs text-yellow-100/70">
+              Gợi ý: Nếu số hoạt động bất thường tăng hoặc thời gian nghỉ ngơi giảm bất thường so với các ngày khác, nên kiểm tra sức khỏe, khẩu phần và môi trường nuôi.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bảng dữ liệu -->
+      <section class="glass-panel rounded-2xl px-3 py-4 md:px-6 md:py-5">
+        <div class="flex items-center justify-between mb-3 md:mb-4">
+          <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+            <span>📋</span>
+            <span>Danh sách bản ghi quan sát</span>
+          </h2>
+          <p class="text-[11px] md:text-xs text-yellow-100/70" id="recordCountText">0 bản ghi</p>
+        </div>
+        <div class="overflow-auto scrollbar-thin max-h-[420px] border border-yellow-400/30 rounded-xl bg-emerald-950/50">
+          <table class="min-w-full text-xs md:text-sm">
+            <thead class="text-yellow-100 uppercase text-[10px] md:text-xs">
+              <tr>
+                <th class="px-2 md:px-3 py-2 text-left">Ngày</th>
+                <th class="px-2 md:px-3 py-2 text-left">Thời điểm</th>
+                <th class="px-2 md:px-3 py-2 text-left">Hoạt động</th>
+                <th class="px-2 md:px-3 py-2 text-left">Thời lượng (phút)</th>
+                <th class="px-2 md:px-3 py-2 text-left">Thức ăn</th>
+                <th class="px-2 md:px-3 py-2 text-left">Vị trí</th>
+                <th class="px-2 md:px-3 py-2 text-left">Sức khỏe</th>
+                <th class="px-2 md:px-3 py-2 text-left">Ghi chú</th>
+                <th class="px-2 md:px-3 py-2 text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody" class="divide-y divide-emerald-700/70 text-yellow-50/95">
+              <!-- Dòng dữ liệu sẽ được thêm bằng JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'deer_behavior_logs_v1';
+
+    const form = document.getElementById('logForm');
+    const dateInput = document.getElementById('date');
+    const timeBlockInput = document.getElementById('timeBlock');
+    const activityInput = document.getElementById('activity');
+    const durationInput = document.getElementById('duration');
+    const feedInput = document.getElementById('feed');
+    const locationInput = document.getElementById('location');
+    const healthInput = document.getElementById('health');
+    const noteInput = document.getElementById('note');
+
+    const filterDateInput = document.getElementById('filterDate');
+    const filterActivityInput = document.getElementById('filterActivity');
+    const filterHealthInput = document.getElementById('filterHealth');
+
+    const logTableBody = document.getElementById('logTableBody');
+    const totalLogsSpan = document.getElementById('totalLogs');
+    const eatCountSpan = document.getElementById('eatCount');
+    const abnormalCountSpan = document.getElementById('abnormalCount');
+    const totalDurationSpan = document.getElementById('totalDuration');
+    const recordCountText = document.getElementById('recordCountText');
+    const lastSavedText = document.getElementById('lastSavedText');
+    const statusText = document.getElementById('statusText');
+
+    const resetFormBtn = document.getElementById('resetFormBtn');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+
+    let logs = [];
+
+    function setTodayOnInputs() {
+      const today = new Date().toISOString().slice(0, 10);
+      if (!dateInput.value) dateInput.value = today;
+      if (!filterDateInput.value) filterDateInput.value = today;
+    }
+
+    function loadLogs() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        logs = stored ? JSON.parse(stored) : [];
+        if (!Array.isArray(logs)) logs = [];
+      } catch (e) {
+        logs = [];
+      }
+    }
+
+    function saveLogs() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+        const now = new Date();
+        lastSavedText.textContent = `Lưu lần cuối: ${now.toLocaleString('vi-VN')}`;
+      } catch (e) {
+        console.error('Không thể lưu localStorage', e);
+      }
+    }
+
+    function humanDate(dStr) {
+      if (!dStr) return '';
+      const [y, m, d] = dStr.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    function render() {
+      const filterDate = filterDateInput.value;
+      const filterActivity = filterActivityInput.value;
+      const filterHealth = filterHealthInput.value;
+
+      const filtered = logs.filter((log) => {
+        if (filterDate && log.date !== filterDate) return false;
+        if (filterActivity && log.activity !== filterActivity) return false;
+        if (filterHealth && log.health !== filterHealth) return false;
+        return true;
+      });
+
+      logTableBody.innerHTML = '';
+
+      filtered.forEach((log, index) => {
+        const tr = document.createElement('tr');
+        tr.className = index % 2 === 0 ? 'bg-emerald-900/40' : 'bg-emerald-900/20';
+
+        tr.innerHTML = `
+          <td class="px-2 md:px-3 py-2 align-top whitespace-nowrap">${humanDate(log.date)}</td>
+          <td class="px-2 md:px-3 py-2 align-top">${log.timeBlock}</td>
+          <td class="px-2 md:px-3 py-2 align-top">${log.activity}</td>
+          <td class="px-2 md:px-3 py-2 align-top text-center">${log.duration || ''}</td>
+          <td class="px-2 md:px-3 py-2 align-top">${log.feed || ''}</td>
+          <td class="px-2 md:px-3 py-2 align-top">${log.location || ''}</td>
+          <td class="px-2 md:px-3 py-2 align-top text-xs">${log.health || ''}</td>
+          <td class="px-2 md:px-3 py-2 align-top max-w-[180px] md:max-w-xs text-[11px]">${log.note || ''}</td>
+          <td class="px-2 md:px-3 py-2 align-top text-center">
+            <button
+              data-id="${log.id}"
+              class="delete-btn text-[10px] md:text-xs text-red-200 border border-red-400/70 rounded px-2 py-1 hover:bg-red-500/20"
+            >
+              Xóa
+            </button>
+          </td>
+        `;
+
+        logTableBody.appendChild(tr);
+      });
+
+      // Cập nhật thống kê
+      totalLogsSpan.textContent = filtered.length;
+      recordCountText.textContent = `${filtered.length} bản ghi được hiển thị`;
+
+      let eatCount = 0;
+      let abnormalCount = 0;
+      let totalDuration = 0;
+
+      filtered.forEach((log) => {
+        if (log.activity === 'Ăn uống') eatCount++;
+        if (log.activity && log.activity.startsWith('Bất thường')) abnormalCount++;
+        if (log.duration) totalDuration += Number(log.duration) || 0;
+      });
+
+      eatCountSpan.textContent = eatCount;
+      abnormalCountSpan.textContent = abnormalCount;
+      totalDurationSpan.textContent = totalDuration;
+    }
+
+    function validateForm() {
+      if (!dateInput.value) {
+        alert('Vui lòng chọn ngày.');
+        return false;
+      }
+      if (!timeBlockInput.value) {
+        alert('Vui lòng chọn thời điểm quan sát.');
+        return false;
+      }
+      if (!activityInput.value) {
+        alert('Vui lòng chọn hoạt động chính.');
+        return false;
+      }
+      if (durationInput.value && Number(durationInput.value) < 0) {
+        alert('Thời lượng không được âm.');
+        return false;
+      }
+      return true;
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!validateForm()) return;
+
+      const log = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        date: dateInput.value,
+        timeBlock: timeBlockInput.value,
+        activity: activityInput.value,
+        duration: durationInput.value ? Number(durationInput.value) : null,
+        feed: feedInput.value.trim(),
+        location: locationInput.value,
+        health: healthInput.value,
+        note: noteInput.value.trim(),
+        createdAt: new Date().toISOString(),
+      };
+
+      logs.push(log);
+      saveLogs();
+      render();
+
+      statusText.textContent = 'Đã thêm bản ghi mới';
+      statusText.classList.remove('text-emerald-200');
+      statusText.classList.add('text-yellow-200');
+      setTimeout(() => {
+        statusText.textContent = 'Sẵn sàng';
+        statusText.classList.remove('text-yellow-200');
+        statusText.classList.add('text-emerald-200');
+      }, 2500);
+
+      // Giữ lại ngày & bộ lọc, chỉ xóa các trường khác
+      timeBlockInput.value = '';
+      activityInput.value = '';
+      durationInput.value = '';
+      feedInput.value = '';
+      locationInput.value = '';
+      healthInput.value = 'Bình thường';
+      noteInput.value = '';
+    });
+
+    resetFormBtn.addEventListener('click', () => {
+      timeBlockInput.value = '';
+      activityInput.value = '';
+      durationInput.value = '';
+      feedInput.value = '';
+      locationInput.value = '';
+      healthInput.value = 'Bình thường';
+      noteInput.value = '';
+    });
+
+    filterDateInput.addEventListener('change', render);
+    filterActivityInput.addEventListener('change', render);
+    filterHealthInput.addEventListener('change', render);
+
+    clearFilterBtn.addEventListener('click', () => {
+      filterDateInput.value = '';
+      filterActivityInput.value = '';
+      filterHealthInput.value = '';
+      render();
+    });
+
+    clearAllBtn.addEventListener('click', () => {
+      if (!confirm('Bạn có chắc muốn xóa toàn bộ dữ liệu (chỉ trên trình duyệt hiện tại)?')) return;
+      logs = [];
+      saveLogs();
+      render();
+    });
+
+    logTableBody.addEventListener('click', (e) => {
+      const btn = e.target.closest('.delete-btn');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      if (!id) return;
+      if (!confirm('Xóa bản ghi này?')) return;
+      logs = logs.filter((log) => log.id !== id);
+      saveLogs();
+      render();
+    });
+
+    // Khởi tạo
+    setTodayOnInputs();
+    loadLogs();
+    render();
+  </script>
+</body>
+</html>
